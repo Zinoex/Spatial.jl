@@ -23,8 +23,8 @@ has_mbr(elem::SpatialElem) = true
 mbr(elem::SpatialElem) = elem.mbr
 region(elem::SpatialElem) = region(elem.data)
 
-# While a LazySet natively supports mbr, we recommend to wrap it in
-# SpatialElem to avoid recomputing for every query
-has_mbr(elem::LazySet) = true
+# While a LazySet natively supports mbr (for bounded sets), we recommend
+# to wrap it in SpatialElem to avoid recomputing for every query
+has_mbr(elem::LazySet) = isbounded(elem)
 mbr(elem::LazySet) = box_approximation(elem)
 region(elem::LazySet) = elem
