@@ -15,14 +15,16 @@ has_mbr(query::AbstractSpatialQuery) = true
 struct PointQuery{T, VT<:AbstractSingleton{T}} <: AbstractSpatialQuery{T}
     point::VT
 end
+PointQuery(point::VT) where {T, VT<:AbstractVector{T}} = PointQuery(Singleton(point))
+
 mbr(query::PointQuery) = query.point
 region(query::PointQuery) = query.point
 function satisfy(query::PointQuery, elem)
-    if has_mbr(elem) && mbr(query) ∉ mbr(elem)
+    if has_mbr(elem) && element(mbr(query)) ∉ mbr(elem)
         return false
     end
 
-    return region(query) ∈ region(elem)
+    return element(region(query)) ∈ region(elem)
 end
 
 ##################

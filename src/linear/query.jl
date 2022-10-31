@@ -7,6 +7,8 @@ function findfirst(query, index)
             return elem
         end
     end
+
+    return nothing
 end
 
 findall(query, index) = (elem for elem in index if satisfy(query, elem))
