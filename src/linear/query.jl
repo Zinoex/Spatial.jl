@@ -11,4 +11,4 @@ function findfirst(query, index)
     return nothing
 end
 
-findall(query, index) = (elem for elem in index if satisfy(query, elem))
+findall(query, index) = [elem for elem in index if satisfy(query, elem)]

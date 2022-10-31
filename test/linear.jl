@@ -35,7 +35,7 @@ using LazySets
 
     # Test findall non-empty
     query = PointQuery(Singleton([5.5]))
-    res = collect(Spatial.findall(query, index))
+    res = Spatial.findall(query, index)
 
     @test length(res) == 1
 
@@ -44,13 +44,13 @@ using LazySets
 
     # Test findall empty
     query = PointQuery(Singleton([-1.0]))
-    res = collect(Spatial.findall(query, index))
+    res = Spatial.findall(query, index)
 
     @test length(res) == 0
 
     # Test RegionConstainsQuery - 2 elements wide
     query = RegionConstainsQuery(Hyperrectangle(low=[0.5], high=[3.5]))
-    res = collect(Spatial.findall(query, index))
+    res = Spatial.findall(query, index)
 
     @test length(res) == 2
 
@@ -62,19 +62,19 @@ using LazySets
 
     # Test RegionConstainsQuery - smaller than elements
     query = RegionConstainsQuery(Hyperrectangle(low=[0.5], high=[1.0]))
-    res = collect(Spatial.findall(query, index))
+    res = Spatial.findall(query, index)
 
     @test length(res) == 0
 
     # Test RegionSubsetQuery - too large
     query = RegionSubsetQuery(Hyperrectangle(low=[0.5], high=[3.5]))
-    res = collect(Spatial.findall(query, index))
+    res = Spatial.findall(query, index)
 
     @test length(res) == 0
 
     # Test RegionSubsetQuery - fits within one element
     query = RegionSubsetQuery(Hyperrectangle(low=[4.5], high=[5.0]))
-    res = collect(Spatial.findall(query, index))
+    res = Spatial.findall(query, index)
 
     @test length(res) == 1
 
@@ -83,7 +83,7 @@ using LazySets
 
     # Test RegionIntersectsQuery - intersects two elements
     query = RegionIntersectsQuery(Hyperrectangle(low=[4.5], high=[5.5]))
-    res = collect(Spatial.findall(query, index))
+    res = Spatial.findall(query, index)
 
     @test length(res) == 2
 
