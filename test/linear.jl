@@ -92,4 +92,20 @@ using LazySets
 
     @test low(region(res[2]), 1) ≈ 5.0
     @test high(region(res[2]), 1) ≈ 6.0
+
+    # Test delete!
+    query = RegionIntersectsQuery(Hyperrectangle(low=[4.5], high=[5.5]))
+    delete!(query, index)
+    res = Spatial.findall(query, index)
+
+    @test length(res) == 0
+    @test length(index) == 8
+
+    # Test insert!
+    insert!(index, SpatialElem(Hyperrectangle(low=[4.5], high=[5.5])))
+    query = PointQuery([5.0])
+    res = Spatial.findfirst(query, index)
+
+    @test low(region(res), 1) ≈ 4.5
+    @test high(region(res), 1) ≈ 5.5
 end

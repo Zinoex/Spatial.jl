@@ -1,6 +1,6 @@
 export LinearIndex
 
-struct LinearIndex{T, E, VE<:AbstractVector{E}} <: AbstractSpatialIndex{T, E}
+mutable struct LinearIndex{T, E, VE<:AbstractVector{E}} <: AbstractSpatialIndex{T, E}
     container::VE
 end
 LinearIndex{T}(container::VE) where {T, VE<:AbstractVector} = LinearIndex{T, eltype(VE), VE}(container)

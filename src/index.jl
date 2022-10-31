@@ -12,6 +12,10 @@ abstract type AbstractSpatialIndex{T, E} end
 # - findall(query, index)
 # We don't adapt this to Base.findfirst and Base.findall as
 # they return indices, and we want the element instead.
+# 
+# - Base.insert!(index, elem)
+# - Base.delete!(query, index)
+# - bulk_load! (from AbstractVector)
 
 # If the data is not hyperrectangular, we may over-approximate
 # it and wrap in this class
@@ -19,6 +23,12 @@ struct SpatialElem{T, VT<:AbstractHyperrectangle{T}, E}
     data::E
     mbr::VT
 end
+function SpatialElem(data) 
+    @assert has_mbr(data)
+
+    SpatialElem(data, mbr(data))
+end
+
 has_mbr(elem::SpatialElem) = true
 mbr(elem::SpatialElem) = elem.mbr
 region(elem::SpatialElem) = region(elem.data)
