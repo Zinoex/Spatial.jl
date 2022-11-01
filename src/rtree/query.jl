@@ -1,22 +1,27 @@
 export VisitorState, traverse, traverse_parent, traverse_child, increment_last!, should_visit
 
-function increment_last!(stack)
-    stack[end] += 1
-end
+abstract type ChildOrdering end
+struct NoOrdering <: ChildOrdering end
+
+ordering(children, ::NoOrdering) = children
 
 # Visitor pattern
-Base.@kwdef mutable struct VisitorState{Q<:AbstractQuery}
+Base.@kwdef mutable struct VisitorState{Q<:AbstractQuery, O<:ChildOrdering}
     index_stack::Vector{Int} = Vector{Int}()
     current_node::Union{AbstractNode, Nothing} = nothing 
     query::Q = AllQuery()
+    ordering::O
+    return_leaf::Bool = false
 end
 
 function traverse(node::Branch, state)
     increment_last!(state.index_stack)
     n = length(node)
 
+    children = ordering(node.children, state.ordering)
+
     while last(state.index_stack) <= n
-        child = node.children[last(state.index_stack)]
+        child = children[last(state.index_stack)]
         if should_visit(child, state)
             return traverse_child(child, state)
         end
@@ -27,6 +32,10 @@ function traverse(node::Branch, state)
 end
 
 function traverse(node::Leaf, state)
+    if return_leaf
+        return node
+    end
+
     increment_last!(state.index_stack)
     n = length(node)
 
@@ -62,6 +71,10 @@ function should_visit(node::AbstractNode, state::VisitorState{Q}) where {T, Q<:A
     return !is_mbr_disjoint(state.query, node)
 end
 should_visit(node::AbstractNode, state::VisitorState{Q}) where {Q<:AbstractQuery} = true
+
+function increment_last!(stack)
+    stack[end] += 1
+end
 
 # Access methods
 # WARNING: Do not interleave update and iterate
