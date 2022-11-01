@@ -1,6 +1,6 @@
 export AbstractNode, Branch, Leaf, RTreeIndex
 export level, tree_height, isroot
-
+export RTreeUpdateStrategy, OrdinaryRTreeUpdateStrategy
 
 abstract type AbstractNode{T, E} end
 has_mbr(node::AbstractNode) = true
@@ -30,8 +30,10 @@ Base.length(node::Leaf) = length(node.data)
 abstract type RTreeUpdateStrategy end
 
 Base.@kwdef struct OrdinaryRTreeUpdateStrategy <: RTreeUpdateStrategy
-    branch_capacity::Integer = 100
-    leaf_capacity::Integer = 100
+    branch_capacity = 100
+    leaf_capacity = 100
+
+    min_fill = 0.4   # percentage
 end
 
 Base.@kwdef mutable struct RTreeIndex{T, E} <: AbstractSpatialIndex{T, E}

@@ -35,7 +35,7 @@ using LazySets
 
     @test isroot(root)
 
-    index = RTreeIndex(3, root)
+    index = RTreeIndex(3, root, OrdinaryRTreeUpdateStrategy(leaf_capacity=2))
 
     # Test PointQuery - in two regions
     query = PointQuery([2.5, 2.0])
@@ -144,11 +144,12 @@ using LazySets
     # @test length(res) == 0
     # @test length(index) == 8
 
-    # Test insert!
+    # Test insert! - no splitting
     rect4 = Hyperrectangle(low=[5.0, 2.0], high=[6.0, 3.0])
     insert!(index, rect4)
 
     @test length(index) == 4
+    @test length(index.root) == 2
 
     query = PointQuery([5.5, 2.5])
     res = Spatial.findfirst(query, index)
@@ -156,5 +157,20 @@ using LazySets
     @test low(region(res), 1) ≈ 5.0
     @test low(region(res), 2) ≈ 2.0
     @test high(region(res), 1) ≈ 6.0
+    @test high(region(res), 2) ≈ 3.0
+
+    # Test insert! - splitting
+    rect4 = Hyperrectangle(low=[8.0, 2.0], high=[9.0, 3.0])
+    insert!(index, rect4)
+
+    @test length(index) == 5
+    @test length(index.root) == 3
+
+    query = PointQuery([8.5, 2.5])
+    res = Spatial.findfirst(query, index)
+
+    @test low(region(res), 1) ≈ 8.0
+    @test low(region(res), 2) ≈ 2.0
+    @test high(region(res), 1) ≈ 9.0
     @test high(region(res), 2) ≈ 3.0
 end
