@@ -1,10 +1,13 @@
 export AbstractQuery, AbstractSpatialQuery
 export findfirst, findall
 export PointQuery, RegionConstainsQuery, RegionSubsetQuery, RegionIntersectsQuery
+export is_mbr_disjoint
 
 # Generic queries may also select based on non-spatial properties (e.g. id, name, etc.).
 # As a result, they may not be efficient.
 abstract type AbstractQuery end
+struct AllQuery <: AbstractQuery end
+satisfy(query::AllQuery, elem) = true
 
 # Spatial queries that may exploit the geometric properties of index and query.
 abstract type AbstractSpatialQuery{T} end

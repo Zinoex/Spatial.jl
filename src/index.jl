@@ -16,25 +16,3 @@ abstract type AbstractSpatialIndex{T, E} end
 # - Base.insert!(index, elem)
 # - Base.delete!(query, index)
 # - bulk_load! (from AbstractVector)
-
-# If the data is not hyperrectangular, we may over-approximate
-# it and wrap in this class
-struct SpatialElem{T, VT<:AbstractHyperrectangle{T}, E}
-    data::E
-    mbr::VT
-end
-function SpatialElem(data) 
-    @assert has_mbr(data)
-
-    SpatialElem(data, mbr(data))
-end
-
-has_mbr(elem::SpatialElem) = true
-mbr(elem::SpatialElem) = elem.mbr
-region(elem::SpatialElem) = region(elem.data)
-
-# While a LazySet natively supports mbr (for bounded sets), we recommend
-# to wrap it in SpatialElem to avoid recomputing for every query
-has_mbr(elem::LazySet) = isbounded(elem)
-mbr(elem::LazySet) = box_approximation(elem)
-region(elem::LazySet) = elem
