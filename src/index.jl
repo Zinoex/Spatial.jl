@@ -1,4 +1,4 @@
-export AbstractSpatialIndex, SpatialElem, has_mbr, mbr, region
+export AbstractSpatialIndex
 
 abstract type AbstractSpatialIndex{T, E} end
 

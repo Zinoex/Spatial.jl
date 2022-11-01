@@ -1,8 +1,8 @@
-
+export SpatialElem, has_mbr, mbr, region, join_mbr, hyperrectangle
 
 # If the data is not hyperrectangular, we may over-approximate
 # it and wrap in this class
-@kwdef struct SpatialElem{T, VT<:AbstractHyperrectangle{T}, E}
+Base.@kwdef struct SpatialElem{T, VT<:AbstractHyperrectangle{T}, E}
     data::E
     mbr::VT
 end
@@ -15,7 +15,6 @@ end
 has_mbr(elem::SpatialElem) = true
 mbr(elem::SpatialElem) = elem.mbr
 region(elem::SpatialElem) = region(elem.data)
-data(elem::SpatialElem{V, VT, E}) = elem.data
 
 # While a LazySet natively supports mbr (for bounded sets), we recommend
 # to wrap it in SpatialElem to avoid recomputing for every query
@@ -29,5 +28,6 @@ function join_mbr(mbrs::VVT) where {T, VT<:AbstractHyperrectangle{T}, VVT<:Abstr
 
     return hyperrectangle(VT, min_low, max_high)
 end
+join_mbr(mbrs::VT...) where {T, VT<:AbstractHyperrectangle{T}} = join_mbr(collect(mbrs))
 
-hyperrectangle(Hyperrectangle{T}, low, high) where {T} = Hyperrectangle(low=low, high=high)
+hyperrectangle(::Type{Hyperrectangle{N, VNC, VNR}}, low, high) where {N, VNC<:AbstractVector{N}, VNR<:AbstractVector{N}} = Hyperrectangle(low=low, high=high)
