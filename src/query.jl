@@ -10,7 +10,7 @@ struct AllQuery <: AbstractQuery end
 satisfy(query::AllQuery, elem) = true
 
 # Spatial queries that may exploit the geometric properties of index and query.
-abstract type AbstractSpatialQuery{T} end
+abstract type AbstractSpatialQuery{T} <: AbstractQuery end
 has_mbr(query::AbstractSpatialQuery) = true
 # All spatial queries must implement mbr and region
 

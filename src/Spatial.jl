@@ -8,4 +8,5 @@ include("query.jl")
 
 # Index types
 include("linear/linear.jl")
+include("rtree/rtree.jl")
 end
