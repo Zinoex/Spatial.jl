@@ -31,3 +31,5 @@ end
 join_mbr(mbrs::VT...) where {T, VT<:AbstractHyperrectangle{T}} = join_mbr(collect(mbrs))
 
 hyperrectangle(::Type{Hyperrectangle{N, VNC, VNR}}, low, high) where {N, VNC<:AbstractVector{N}, VNR<:AbstractVector{N}} = Hyperrectangle(low=low, high=high)
+
+volume(mbr::VT) where {T, VT<:AbstractHyperrectangle{T}} = prod(radius_hyperrectangle(mbr) .* 2)
