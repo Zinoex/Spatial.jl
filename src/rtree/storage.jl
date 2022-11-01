@@ -1,13 +1,14 @@
-export AbstractNode, Branch, Leaf, RTree
-export level, tree_height
+export AbstractNode, Branch, Leaf, RTreeIndex
+export level, tree_height, isroot
 
 
 abstract type AbstractNode{T, E} end
 has_mbr(node::AbstractNode) = true
 mbr(node::AbstractNode) = node.mbr
+isroot(node::AbstractNode) = isnothing(node.parent)
 
-struct Branch{T, VT<:AbstractHyperrectangle{T}, E, VC<:AbstractVector{<:AbstractNode{T, E}}} <: AbstractNode{T, E} 
-    parent::Union{Branch{T, E}, Nothing}
+Base.@kwdef mutable struct Branch{T, VT<:AbstractHyperrectangle{T}, E, VC<:AbstractVector{<:AbstractNode{T, E}}} <: AbstractNode{T, E} 
+    parent::Union{Branch{T, E}, Nothing} = nothing
     level::Int
 
     mbr::VT
@@ -16,8 +17,8 @@ end
 level(node::Branch) = node.level
 Base.length(node::Branch) = length(node.children)
 
-struct Leaf{T, VT<:AbstractHyperrectangle{T}, E, VE<:AbstractVector{E}} <: AbstractNode{T, E} 
-    parent::Union{Branch{T, E}, Nothing}
+Base.@kwdef mutable struct Leaf{T, VT<:AbstractHyperrectangle{T}, E, VE<:AbstractVector{E}} <: AbstractNode{T, E} 
+    parent::Union{Branch{T, E}, Nothing} = nothing
 
     mbr::Union{VT, Nothing}
     data::VE  # Vector of data elements
@@ -25,19 +26,23 @@ end
 level(node::Leaf) = 1
 Base.length(node::Leaf) = length(node.data)
 
-@kwdef mutable struct RTree{T, E} <: AbstractSpatialIndex{T, E}
-    nelem::Int = 0
-    root::AbstractNode{T, E} = Leaf{}
 
+abstract type RTreeUpdateStrategy end
+
+Base.@kwdef struct OrdinaryRTreeUpdateStrategy <: RTreeUpdateStrategy
     branch_capacity::Integer = 100
     leaf_capacity::Integer = 100
-
-    fill_factor::Float64 = 0.7
-    split_factor::Float64 = 0.4
-    reinsert_factor::Float64 = 0.3
 end
 
-Base.isempty(index::RTree) = length(index) == 0
-Base.length(index::RTree) = index.nelem
-Base.eltype(::RTree{T, E}) where {T, E} = E
-tree_height(index::RTree) = level(index.root)
+Base.@kwdef mutable struct RTreeIndex{T, E} <: AbstractSpatialIndex{T, E}
+    nelem::Int = 0
+    root::AbstractNode{T, E} = Leaf{T, Hyperrectangle{T}, E, Vector{E}}(nothing, nothing, Vector{E}())
+
+    update_strategy::RTreeUpdateStrategy = OrdinaryRTreeUpdateStrategy()
+end
+RTreeIndex(nelem, root) = RTreeIndex(nelem, root, OrdinaryRTreeUpdateStrategy())
+
+Base.isempty(index::RTreeIndex) = length(index) == 0
+Base.length(index::RTreeIndex) = index.nelem
+Base.eltype(::RTreeIndex{T, E}) where {T, E} = E
+tree_height(index::RTreeIndex) = level(index.root)
