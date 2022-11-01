@@ -144,11 +144,17 @@ using LazySets
     # @test length(res) == 0
     # @test length(index) == 8
 
-    # # Test insert!
-    # insert!(index, SpatialElem(Hyperrectangle(low=[4.5], high=[5.5])))
-    # query = PointQuery([5.0])
-    # res = Spatial.findfirst(query, index)
+    # Test insert!
+    rect4 = Hyperrectangle(low=[5.0, 2.0], high=[6.0, 3.0])
+    insert!(index, rect4)
 
-    # @test low(region(res), 1) ≈ 4.5
-    # @test high(region(res), 1) ≈ 5.5
+    @test length(index) == 4
+
+    query = PointQuery([5.5, 2.5])
+    res = Spatial.findfirst(query, index)
+
+    @test low(region(res), 1) ≈ 5.0
+    @test low(region(res), 2) ≈ 2.0
+    @test high(region(res), 1) ≈ 6.0
+    @test high(region(res), 2) ≈ 3.0
 end

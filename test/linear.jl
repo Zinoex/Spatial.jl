@@ -103,6 +103,9 @@ using LazySets
 
     # Test insert!
     insert!(index, SpatialElem(Hyperrectangle(low=[4.5], high=[5.5])))
+
+    @test length(index) == 9
+
     query = PointQuery([5.0])
     res = Spatial.findfirst(query, index)
 

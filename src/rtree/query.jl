@@ -10,7 +10,7 @@ Base.@kwdef mutable struct VisitorState{Q<:AbstractQuery, O<:ChildOrdering}
     index_stack::Vector{Int} = Vector{Int}()
     current_node::Union{AbstractNode, Nothing} = nothing 
     query::Q = AllQuery()
-    ordering::O
+    ordering::O = NoOrdering()
     return_leaf::Bool = false
 end
 
@@ -32,7 +32,7 @@ function traverse(node::Branch, state)
 end
 
 function traverse(node::Leaf, state)
-    if return_leaf
+    if state.return_leaf
         return node
     end
 
