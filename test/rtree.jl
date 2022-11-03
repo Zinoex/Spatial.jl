@@ -15,8 +15,8 @@ using LazySets
     @test high(rect12_mbr, 1) ≈ 4.0
     @test high(rect12_mbr, 2) ≈ 5.0
 
-    leaf1 = Leaf(mbr=rect12_mbr, data=[rect1, rect2])
-    leaf2 = Leaf(mbr=rect3, data=[rect3])
+    leaf1 = Leaf(id=1, mbr=rect12_mbr, data=[rect1, rect2])
+    leaf2 = Leaf(id=2, mbr=rect3, data=[rect3])
 
     @test level(leaf1) == 1
     @test length(leaf1) == 2
@@ -29,13 +29,13 @@ using LazySets
     @test high(rect123_mbr, 1) ≈ 7.0
     @test high(rect123_mbr, 2) ≈ 5.0
 
-    root = Branch(nothing, 1, rect123_mbr, [leaf1, leaf2])
+    root = Branch(3, nothing, 1, rect123_mbr, [leaf1, leaf2])
     leaf1.parent = root
     leaf2.parent = root
 
     @test isroot(root)
 
-    index = RTreeIndex(3, root, OrdinaryRTreeUpdateStrategy(leaf_capacity=2))
+    index = RTreeIndex(3, root, 0, OrdinaryRTreeUpdateStrategy(leaf_capacity=2))
 
     # Test PointQuery - in two regions
     query = PointQuery([2.5, 2.0])

@@ -1,4 +1,4 @@
-export InsertionOrdering, optimal_insert_index, find_destination_node
+export InsertionOrdering, find_destination_node
 export recursive_split!, should_split, split!, distribute
 export update_ancestor_mbrs!
 
@@ -21,19 +21,19 @@ struct InsertionOrdering <: ChildOrdering
 end
 InsertionOrdering(elem) = InsertionOrdering(elem, mbr(elem))
 
-function optimal_insert_index(children, ordering::InsertionOrdering)
+function ordering(children, ordering::InsertionOrdering) 
     primary_goal = Base.findall(child -> ordering.mbr ⊆ mbr(child), children)
 
     if !isempty(primary_goal)
-        return argmin(idx -> volume(mbr(children[idx])), primary_goal)
+        children = children[primary_goal]
+        sort!(children, by=node -> volume(mbr(node)))
+        return children
     end
     
-    enlargement(idx) = volume(join_mbr(ordering.mbr, mbr(children[idx]))) - volume(mbr(children[idx]))
-
-    return argmin(enlargement, eachindex(children))
+    enlargement(node) = volume(join_mbr(ordering.mbr, mbr(node))) - volume(mbr(node))
+    sort!(children, by=enlargement)
+    return children
 end
-
-ordering(children, ordering::InsertionOrdering) = [children[optimal_insert_index(children, ordering)]]
 
 function find_destination_node(index::RTreeIndex, elem)
     state = VisitorState(ordering=InsertionOrdering(elem), return_leaf=true)
@@ -58,10 +58,11 @@ function recursive_split!(index::RTreeIndex, node::AbstractNode, elem, update_st
         return node
     end
 
-    node1, node2 = split(node, update_strategy)
+    id1, id2 = next_id!(index), next_id!(index)
+    node1, node2 = split(node, id1, id2, update_strategy)
 
     if isroot(node)
-        node = Branch(nothing, level(node) + 1, join_mbr(mbr(node1), mbr(node2)), [node1, node2])
+        node = Branch(next_id!(index), nothing, level(node) + 1, join_mbr(mbr(node1), mbr(node2)), [node1, node2])
         index.root = node
         node1.parent = node
         node2.parent = node
@@ -69,8 +70,7 @@ function recursive_split!(index::RTreeIndex, node::AbstractNode, elem, update_st
         return node
     end
 
-    idx = optimal_insert_index(node.parent.children, InsertionOrdering(elem))
-    deleteat!(node.parent, idx)
+    delete!(node.parent, node)
 
     insert!(node.parent, node1)
     insert!(node.parent, node2)
@@ -82,19 +82,19 @@ end
 should_split(node::Leaf, update_strategy::OrdinaryRTreeUpdateStrategy) = length(node) > update_strategy.leaf_capacity
 should_split(node::Branch, update_strategy::OrdinaryRTreeUpdateStrategy) = length(node) > update_strategy.branch_capacity
 
-function split(node::Leaf, update_strategy)
+function split(node::Leaf, id1, id2, update_strategy)
     N₁, N₂ = distribute(node.data, update_strategy, update_strategy.leaf_capacity)
-    node1 = Leaf(node.parent, join_mbr(mbr.(N₁)), N₁)
-    node2 = Leaf(node.parent, join_mbr(mbr.(N₂)), N₂)
+    node1 = Leaf(id1, node.parent, join_mbr(mbr.(N₁)), N₁)
+    node2 = Leaf(id2, node.parent, join_mbr(mbr.(N₂)), N₂)
     
     return node1, node2
 end
 
-function split(node::Branch, update_strategy)
+function split(node::Branch, id1, id2, update_strategy)
     N₁, N₂ = distribute(node.children, update_strategy, update_strategy.branch_capacity)
 
-    node1 = Branch(node.parent, level(node), join_mbr(mbr.(N₁)), N₁)
-    node2 = Branch(node.parent, level(node), join_mbr(mbr.(N₂)), N₂)
+    node1 = Branch(id1, node.parent, level(node), join_mbr(mbr.(N₁)), N₁)
+    node2 = Branch(id2, node.parent, level(node), join_mbr(mbr.(N₂)), N₂)
 
     for i in eachindex(N₁)
         node1.children[i].parent = node1
