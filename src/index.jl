@@ -1,4 +1,5 @@
 export AbstractSpatialIndex
+export bulk_load!
 
 abstract type AbstractSpatialIndex{T, E} end
 
