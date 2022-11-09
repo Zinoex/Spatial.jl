@@ -15,8 +15,8 @@ using LazySets
     @test high(rect12_mbr, 1) ≈ 4.0
     @test high(rect12_mbr, 2) ≈ 5.0
 
-    leaf1 = Leaf(id=1, mbr=rect12_mbr, data=[rect1, rect2])
-    leaf2 = Leaf(id=2, mbr=rect3, data=[rect3])
+    leaf1 = Leaf(1, rect12_mbr, [rect1, rect2])
+    leaf2 = Leaf(2, rect3, [rect3])
 
     @test level(leaf1) == 1
     @test length(leaf1) == 2

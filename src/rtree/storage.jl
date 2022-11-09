@@ -8,24 +8,32 @@ mbr(node::AbstractNode) = node.mbr
 isroot(node::AbstractNode) = isnothing(node.parent)
 Base.:(==)(x::AbstractNode, y::AbstractNode) = x.id == y.id
 
-Base.@kwdef mutable struct Branch{T, VT<:AbstractHyperrectangle{T}, E, VC<:AbstractVector{<:AbstractNode{T, E}}} <: AbstractNode{T, E} 
+mutable struct Branch{T, E, C<:AbstractNode{T, E}} <: AbstractNode{T, E} 
     id::Int
-    parent::Union{Branch{T, E}, Nothing} = nothing
+    # Parent must be a branch whose child nodes are of type Branch{T, E, C}, aka. this.
+    parent::Union{Branch{T, E, Branch{T, E, C}}, Nothing}
     level::Int
 
-    mbr::VT
-    children::VC  # Either you have more branches or you only have leaves as children
+    mbr::AbstractHyperrectangle{T}
+    children::AbstractVector{C}  # Either you have more branches or you only have leaves as children
 end
+Branch(id, level, mbr, children) = Branch(id, nothing, level, mbr, children)
+
 level(node::Branch) = node.level
 Base.length(node::Branch) = length(node.children)
 
-Base.@kwdef mutable struct Leaf{T, VT<:AbstractHyperrectangle{T}, E, VE<:AbstractVector{E}} <: AbstractNode{T, E} 
-    id::Int
-    parent::Union{Branch{T, E}, Nothing} = nothing
 
-    mbr::Union{VT, Nothing}
-    data::VE  # Vector of data elements
+mutable struct Leaf{T, E} <: AbstractNode{T, E} 
+    id::Int
+    # Parent must be a branch whose child nodes are of type Leaf{T, E}, aka. this.
+    parent::Union{Branch{T, E, Leaf{T, E}}, Nothing}
+
+    mbr::Union{AbstractHyperrectangle{T}, Nothing}
+    data::AbstractVector{E}  # Vector of data elements
 end
+Leaf{T, E}(id) where {T, E} = Leaf{T, E}(id, nothing, nothing, Vector{E}())
+Leaf(id, mbr, data) = Leaf(id, nothing, mbr, data)
+
 level(node::Leaf) = 1
 Base.length(node::Leaf) = length(node.data)
 
@@ -39,15 +47,15 @@ Base.@kwdef struct OrdinaryRTreeUpdateStrategy <: RTreeUpdateStrategy
     min_fill = 0.4   # percentage
 end
 
-Base.@kwdef mutable struct RTreeIndex{T, D, E} <: AbstractSpatialIndex{T, E}
-    nelem::Int = 0
-    root::AbstractNode{T, E} = Leaf{T, Hyperrectangle{T}, E, Vector{E}}(1, nothing, nothing, Vector{E}())
-    next_id::Int = 1   # DO NOT ACCESS DIRECTLY - use next_id!(index)
+mutable struct RTreeIndex{T, D, E} <: AbstractSpatialIndex{T, E}
+    nelem::Int
+    root::AbstractNode{T, E}
+    next_id::Int   # DO NOT ACCESS DIRECTLY - use next_id!(index)
 
-    update_strategy::RTreeUpdateStrategy = OrdinaryRTreeUpdateStrategy()
+    update_strategy::RTreeUpdateStrategy
 end
 RTreeIndex{T, D, E}() where {T, D, E} = RTreeIndex{T, D, E}(OrdinaryRTreeUpdateStrategy())
-RTreeIndex{T, D, E}(update_strategy) where {T, D, E} = RTreeIndex{T, D, E}(update_strategy=update_strategy)
+RTreeIndex{T, D, E}(update_strategy) where {T, D, E} = RTreeIndex{T, D, E}(0, Leaf{T, E}(1), 1, update_strategy)
 
 Base.isempty(index::RTreeIndex) = length(index) == 0
 Base.length(index::RTreeIndex) = index.nelem

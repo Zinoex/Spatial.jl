@@ -2,9 +2,9 @@ export SpatialElem, has_mbr, mbr, region, join_mbr, hyperrectangle
 
 # If the data is not hyperrectangular, we may over-approximate
 # it and wrap in this class
-Base.@kwdef struct SpatialElem{T, VT<:AbstractHyperrectangle{T}, E}
+struct SpatialElem{T<:Real, E}
     data::E
-    mbr::VT
+    mbr::AbstractHyperrectangle{T}
 end
 function SpatialElem(data) 
     @assert has_mbr(data)
