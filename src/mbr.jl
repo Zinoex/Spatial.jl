@@ -23,8 +23,8 @@ mbr(elem::LazySet) = box_approximation(elem)
 region(elem::LazySet) = elem
 
 function join_mbr(mbrs::VVT) where {T, VT<:AbstractHyperrectangle{T}, VVT<:AbstractVector{VT}}
-    min_low = min.(low.(mbrs)...)
-    max_high = max.(high.(mbrs)...)
+    min_low = reduce((x, y) -> min.(x, y), low.(mbrs))
+    max_high = reduce((x, y) -> max.(x, y), high.(mbrs))
 
     return hyperrectangle(VT, min_low, max_high)
 end
