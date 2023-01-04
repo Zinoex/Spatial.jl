@@ -11,8 +11,10 @@ satisfy(query::AllQuery, elem) = true
 
 # Spatial queries that may exploit the geometric properties of index and query.
 abstract type AbstractSpatialQuery{T} <: AbstractQuery end
-has_mbr(query::AbstractSpatialQuery) = true
-# All spatial queries must implement mbr and region
+has_mbr(query::AbstractSpatialQuery) = !isnothing(mrb(query))
+mbr(query::AbstractSpatialQuery) = query.mbr
+region(query::AbstractSpatialQuery) = query.region
+# All spatial queries must have a region and mbr field, although mbr may be nothing
 
 ### Point query
 struct PointQuery{T, VT<:AbstractSingleton{T}} <: AbstractSpatialQuery{T}
@@ -38,12 +40,16 @@ is_mbr_disjoint(query, elem) = has_mbr(elem) && isdisjoint(mbr(query), mbr(elem)
 ### elem ∈ region query
 struct RegionConstainsQuery{T, VT<:LazySet{T}, VM<:AbstractHyperrectangle{T}} <: AbstractSpatialQuery{T}
     region::VT
-    mbr::VM
+    mbr::Union{Nothing, VM}
 end
-RegionConstainsQuery(region) = RegionConstainsQuery(region, box_approximation(region))
+function RegionConstainsQuery(region) 
+    if isbounded(region)
+        return RegionConstainsQuery(region, box_approximation(region))
+    else
+        return RegionConstainsQuery(region, nothing)
+    end
+end
 
-mbr(query::RegionConstainsQuery) = query.mbr
-region(query::RegionConstainsQuery) = query.region
 function satisfy(query::RegionConstainsQuery, elem)
     if is_mbr_disjoint(query, elem)
         return false
@@ -55,12 +61,16 @@ end
 ### region ∈ elem query
 struct RegionSubsetQuery{T, VT<:LazySet{T}, VM<:AbstractHyperrectangle{T}} <: AbstractSpatialQuery{T}
     region::VT
-    mbr::VM
+    mbr::Union{Nothing, VM}
 end
-RegionSubsetQuery(region) = RegionSubsetQuery(region, box_approximation(region))
+function RegionSubsetQuery(region) 
+    if isbounded(region)
+        return RegionSubsetQuery(region, box_approximation(region))
+    else
+        return RegionSubsetQuery(region, nothing)
+    end
+end
 
-mbr(query::RegionSubsetQuery) = query.mbr
-region(query::RegionSubsetQuery) = query.region
 function satisfy(query::RegionSubsetQuery, elem) 
     if is_mbr_disjoint(query, elem)
         return false
@@ -72,12 +82,16 @@ end
 ### elem ∩ region ≠ ∅ query
 struct RegionIntersectsQuery{T, VT<:LazySet{T}, VM<:AbstractHyperrectangle{T}} <: AbstractSpatialQuery{T}
     region::VT
-    mbr::VM
+    mbr::Union{Nothing, VM}
 end
-RegionIntersectsQuery(region) = RegionIntersectsQuery(region, box_approximation(region))
+function RegionIntersectsQuery(region) 
+    if isbounded(region)
+        return RegionIntersectsQuery(region, box_approximation(region))
+    else
+        return RegionIntersectsQuery(region, nothing)
+    end
+end
 
-mbr(query::RegionIntersectsQuery) = query.mbr
-region(query::RegionIntersectsQuery) = query.region
 function satisfy(query::RegionIntersectsQuery, elem) 
     if is_mbr_disjoint(query, elem)
         return false
