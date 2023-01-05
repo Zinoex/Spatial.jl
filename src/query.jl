@@ -35,7 +35,7 @@ end
 ##################
 # Region queries # 
 ##################
-is_mbr_disjoint(query, elem) = has_mbr(elem) && isdisjoint(mbr(query), mbr(elem))
+is_mbr_disjoint(query, elem) = has_mbr(query) && has_mbr(elem) && isdisjoint(mbr(query), mbr(elem))
 
 ### elem ∈ region query
 struct RegionConstainsQuery{T} <: AbstractSpatialQuery{T}

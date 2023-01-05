@@ -103,6 +103,17 @@ using LazySets
 
     @test length(res) == 0
 
+    # Test RegionConstainsQuery - unbounded query region
+    query = RegionConstainsQuery(HalfSpace([-1.0, 0.0], -5.0))
+    res = Spatial.findall(query, index)
+
+    @test length(res) == 1
+
+    @test low(region(res[1]), 1) ≈ 6.0
+    @test low(region(res[1]), 2) ≈ 2.0
+    @test high(region(res[1]), 1) ≈ 7.0
+    @test high(region(res[1]), 2) ≈ 3.0
+
     # Test RegionSubsetQuery - too large
     query = RegionSubsetQuery(Hyperrectangle(low=[0.0, 0.0], high=[4.5, 5.5]))
     res = Spatial.findall(query, index)

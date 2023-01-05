@@ -71,7 +71,7 @@ function should_visit(node::AbstractNode, state::VisitorState{Q}) where {T, Q<:A
     if has_mbr(state.query)
         return !is_mbr_disjoint(state.query, node)
     else
-        return !isdisjoint(state.query, mbr(node))
+        return !isdisjoint(region(state.query), mbr(node))
     end
 end
 should_visit(node::AbstractNode, state::VisitorState{Q}) where {Q<:AbstractQuery} = true
