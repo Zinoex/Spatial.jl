@@ -68,7 +68,11 @@ end
 
 # Exploit tree structure to prune visiting
 function should_visit(node::AbstractNode, state::VisitorState{Q}) where {T, Q<:AbstractSpatialQuery{T}}
-    return !is_mbr_disjoint(state.query, node)
+    if has_mbr(state.query)
+        return !is_mbr_disjoint(state.query, node)
+    else
+        return !isdisjoint(state.query, mbr(node))
+    end
 end
 should_visit(node::AbstractNode, state::VisitorState{Q}) where {Q<:AbstractQuery} = true
 

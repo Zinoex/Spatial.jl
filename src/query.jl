@@ -11,14 +11,14 @@ satisfy(query::AllQuery, elem) = true
 
 # Spatial queries that may exploit the geometric properties of index and query.
 abstract type AbstractSpatialQuery{T} <: AbstractQuery end
-has_mbr(query::AbstractSpatialQuery) = !isnothing(mrb(query))
+has_mbr(query::AbstractSpatialQuery) = !isnothing(mbr(query))
 mbr(query::AbstractSpatialQuery) = query.mbr
 region(query::AbstractSpatialQuery) = query.region
 # All spatial queries must have a region and mbr field, although mbr may be nothing
 
 ### Point query
-struct PointQuery{T, VT<:AbstractSingleton{T}} <: AbstractSpatialQuery{T}
-    point::VT
+struct PointQuery{T} <: AbstractSpatialQuery{T}
+    point::AbstractSingleton{T}
 end
 PointQuery(point::VT) where {T, VT<:AbstractVector{T}} = PointQuery(Singleton(point))
 
@@ -38,9 +38,9 @@ end
 is_mbr_disjoint(query, elem) = has_mbr(elem) && isdisjoint(mbr(query), mbr(elem))
 
 ### elem ∈ region query
-struct RegionConstainsQuery{T, VT<:LazySet{T}, VM<:AbstractHyperrectangle{T}} <: AbstractSpatialQuery{T}
-    region::VT
-    mbr::Union{Nothing, VM}
+struct RegionConstainsQuery{T} <: AbstractSpatialQuery{T}
+    region::LazySet{T}
+    mbr::Union{Nothing, AbstractHyperrectangle{T}}
 end
 function RegionConstainsQuery(region) 
     if isbounded(region)
@@ -59,9 +59,9 @@ function satisfy(query::RegionConstainsQuery, elem)
 end
 
 ### region ∈ elem query
-struct RegionSubsetQuery{T, VT<:LazySet{T}, VM<:AbstractHyperrectangle{T}} <: AbstractSpatialQuery{T}
-    region::VT
-    mbr::Union{Nothing, VM}
+struct RegionSubsetQuery{T} <: AbstractSpatialQuery{T}
+    region::LazySet{T}
+    mbr::Union{Nothing, AbstractHyperrectangle{T}}
 end
 function RegionSubsetQuery(region) 
     if isbounded(region)
@@ -80,9 +80,9 @@ function satisfy(query::RegionSubsetQuery, elem)
 end
 
 ### elem ∩ region ≠ ∅ query
-struct RegionIntersectsQuery{T, VT<:LazySet{T}, VM<:AbstractHyperrectangle{T}} <: AbstractSpatialQuery{T}
-    region::VT
-    mbr::Union{Nothing, VM}
+struct RegionIntersectsQuery{T} <: AbstractSpatialQuery{T}
+    region::LazySet{T}
+    mbr::Union{Nothing, AbstractHyperrectangle{T}}
 end
 function RegionIntersectsQuery(region) 
     if isbounded(region)
