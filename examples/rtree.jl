@@ -3,7 +3,7 @@ using LazySets
 
 using BenchmarkTools
 
-elems = [rand(Hyperrectangle, dim=3) for _ in 1:100000]
+elems = [translate(rand(Hyperrectangle, dim=3), randn(3) .* 100) for _ in 1:1000000]
 spatial_elems = [SpatialElem(region, mbr(region)) for region in elems]
 
 index = RTreeIndex{Float64, SpatialElem{Float64}}()
