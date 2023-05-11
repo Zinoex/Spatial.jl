@@ -6,7 +6,9 @@ using LazySets
     split = LinRange(0.0, 10.0, 11)
     elems = [Hyperrectangle(low=[low], high=[high]) for (low, high) in zip(split[1:end - 1], split[2:end])]
     spatial_elems = [SpatialElem(region, mbr(region)) for region in elems]
-    index = LinearIndex{Float64}(spatial_elems)
+
+    index = LinearIndex{Float64, SpatialElem{Float64}}()
+    bulk_load!(index, spatial_elems)
 
     # Test that the iterator over LinearIndex works as anticipated
     @test length(index) == length(spatial_elems)

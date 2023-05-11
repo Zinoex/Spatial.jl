@@ -1,6 +1,6 @@
 export top_down_greedy
 
-function bulk_load!(index::RTreeIndex{T, D, E}, data::VE) where {T, D, E, VE<:AbstractVector{E}}
+function bulk_load!(index::RTreeIndex{T, E}, data::VE) where {T, E, VE<:AbstractVector{E}}
     @assert isempty(index) "Cannot bulk load if index is not empty"
 
     update_strategy = index.update_strategy
@@ -16,7 +16,7 @@ function bulk_load!(index::RTreeIndex{T, D, E}, data::VE) where {T, D, E, VE<:Ab
     return index
 end
 
-function top_down_greedy(index::RTreeIndex{T, D, E}, level, data)  where {T, D, E}
+function top_down_greedy(index::RTreeIndex{T, E}, level, data)  where {T, E}
     N = length(data)
 
     # If number of objects is less than or equal than max children per leaf,
@@ -34,6 +34,7 @@ function top_down_greedy(index::RTreeIndex{T, D, E}, level, data)  where {T, D, 
 	end
 
     # If not a leaf, we need to sort the data and split into {index.update_strategy.branch_capacity} partitions
+    D = LazySets.dim(mbr(first(data)))
     N_per_node = ceil(Int, N / index.update_strategy.branch_capacity)
     sort!(data, by=elem -> center(mbr(elem))[(level % D) + 1])
 

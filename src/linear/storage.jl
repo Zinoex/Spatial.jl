@@ -6,7 +6,7 @@ end
 LinearIndex{T}(container::VE) where {T, E, VE<:AbstractVector{E}} = LinearIndex{T, E}(container)
 LinearIndex{T, E}() where {T, E} = LinearIndex{T, E}(Vector{E}())
 
-function bulk_load!(index::LinearIndex{T, E}, data::AbstractVector{E}) where {T, E}
+function bulk_load!(index::LinearIndex, data::AbstractVector)
     index.container = copy(data)
 end
 

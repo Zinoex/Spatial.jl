@@ -35,7 +35,7 @@ using LazySets
 
     @test isroot(root)
 
-    index = RTreeIndex{Float64, 2, Hyperrectangle{Float64, Vector{Float64}, Vector{Float64}}}(3, root, 0, OrdinaryRTreeUpdateStrategy(leaf_capacity=2))
+    index = RTreeIndex{Float64, Hyperrectangle{Float64, Vector{Float64}, Vector{Float64}}}(3, root, 0, OrdinaryRTreeUpdateStrategy(leaf_capacity=2))
 
     # Test PointQuery - in two regions
     query = PointQuery([2.5, 2.0])
@@ -190,7 +190,7 @@ using LazySets
     x, y = zip(x[1:end - 1], x[2:end]), zip(y[1:end - 1], y[2:end])
     elems = [Hyperrectangle(low=[low_x, low_y], high=[high_x, high_y]) for (low_x, high_x) in x for (low_y, high_y) in y]
 
-    index = RTreeIndex{Float64, 2, Hyperrectangle{Float64, Vector{Float64}, Vector{Float64}}}(OrdinaryRTreeUpdateStrategy(leaf_capacity=4, branch_capacity=4))
+    index = RTreeIndex{Float64, Hyperrectangle{Float64, Vector{Float64}, Vector{Float64}}}(OrdinaryRTreeUpdateStrategy(leaf_capacity=4, branch_capacity=4))
     bulk_load!(index, elems)
 
     @test length(index) == 100
