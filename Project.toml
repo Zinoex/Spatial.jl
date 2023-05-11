@@ -1,7 +1,7 @@
 name = "Spatial"
 uuid = "5a2acdf3-0caf-4501-bcc8-47e0871aab01"
 authors = ["Frederik Baymler Mathiesen <frederik@baymler.com> and contributors"]
-version = "0.1.0"
+version = "0.2.0"
 
 [deps]
 LazySets = "b4f0291d-fe17-52bc-9479-3d1a343d9043"
