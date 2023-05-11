@@ -109,16 +109,18 @@ end
 function findall(query, index::RTreeIndex)
     match = []
 
-    if !isempty(index)
-        state = VisitorState(query=query)
-        it = traverse_child(index.root, state)
-    
-        while !isnothing(it)
-            elem, state = it
-            push!(match, elem)
+    if isempty(index)
+        return match
+    end
 
-            it = traverse(state.current_node, state)
-        end
+    state = VisitorState(query=query)
+    it = traverse_child(index.root, state)
+
+    while !isnothing(it)
+        elem, state = it
+        push!(match, elem)
+
+        it = traverse(state.current_node, state)
     end
 
     return match
